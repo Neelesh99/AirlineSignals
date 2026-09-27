@@ -1,0 +1,191 @@
+database:
+  engine: "duckdb" # "duckdb" or "sqlite"
+  db_path: "data/airline_economics.duckdb"
+
+carriers:
+  - code: "AA"
+    icao: "AAL"
+    name: "American Airlines"
+    country: "US"
+    default_load_factor: 0.835
+  - code: "DL"
+    icao: "DAL"
+    name: "Delta Air Lines"
+    country: "US"
+    default_load_factor: 0.842
+  - code: "UA"
+    icao: "UAL"
+    name: "United Airlines"
+    country: "US"
+    default_load_factor: 0.828
+  - code: "B6"
+    icao: "JBU"
+    name: "JetBlue Airways"
+    country: "US"
+    default_load_factor: 0.810
+  - code: "WN"
+    icao: "SWA"
+    name: "Southwest Airlines"
+    country: "US"
+    default_load_factor: 0.795
+  - code: "BA"
+    icao: "BAW"
+    name: "British Airways"
+    country: "UK"
+    default_load_factor: 0.818
+  - code: "LH"
+    icao: "DLH"
+    name: "Lufthansa"
+    country: "DE"
+    default_load_factor: 0.809
+  - code: "AF"
+    icao: "AFR"
+    name: "Air France"
+    country: "FR"
+    default_load_factor: 0.840
+  - code: "SQ"
+    icao: "SIA"
+    name: "Singapore Airlines"
+    country: "SG"
+    default_load_factor: 0.855
+
+airports:
+  JFK: { icao: "KJFK", name: "John F. Kennedy International", city: "New York", country: "US" }
+  LAX: { icao: "KLAX", name: "Los Angeles International", city: "Los Angeles", country: "US" }
+  BOS: { icao: "KBOS", name: "Boston Logan International", city: "Boston", country: "US" }
+  SFO: { icao: "KSFO", name: "San Francisco International", city: "San Francisco", country: "US" }
+  ORD: { icao: "KORD", name: "Chicago O'Hare International", city: "Chicago", country: "US" }
+  LGA: { icao: "KLGA", name: "LaGuardia Airport", city: "New York", country: "US" }
+  MIA: { icao: "KMIA", name: "Miami International", city: "Miami", country: "US" }
+  ATL: { icao: "KATL", name: "Hartsfield-Jackson Atlanta", city: "Atlanta", country: "US" }
+  LHR: { icao: "EGLL", name: "London Heathrow", city: "London", country: "GB" }
+  CDG: { icao: "LFPG", name: "Paris Charles de Gaulle", city: "Paris", country: "FR" }
+  FRA: { icao: "EDDF", name: "Frankfurt Airport", city: "Frankfurt", country: "DE" }
+  SIN: { icao: "WSSS", name: "Singapore Changi", city: "Singapore", country: "SG" }
+  HND: { icao: "RJTT", name: "Tokyo Haneda", city: "Tokyo", country: "JP" }
+
+routes:
+  - origin: "JFK"
+    dest: "LAX"
+    sector: "US Domestic Transcon"
+    distance_miles: 2475
+    aircraft_type: "Narrowbody"
+  - origin: "BOS"
+    dest: "SFO"
+    sector: "US Domestic Transcon"
+    distance_miles: 2704
+    aircraft_type: "Narrowbody"
+  - origin: "ORD"
+    dest: "LGA"
+    sector: "US Domestic Short-Haul"
+    distance_miles: 733
+    aircraft_type: "Narrowbody"
+  - origin: "MIA"
+    dest: "ATL"
+    sector: "US Domestic Short-Haul"
+    distance_miles: 594
+    aircraft_type: "Narrowbody"
+  - origin: "JFK"
+    dest: "LHR"
+    sector: "Transatlantic"
+    distance_miles: 3451
+    aircraft_type: "Widebody"
+  - origin: "BOS"
+    dest: "LHR"
+    sector: "Transatlantic"
+    distance_miles: 3265
+    aircraft_type: "Widebody"
+  - origin: "ORD"
+    dest: "CDG"
+    sector: "Transatlantic"
+    distance_miles: 4153
+    aircraft_type: "Widebody"
+  - origin: "SFO"
+    dest: "SIN"
+    sector: "Transpacific"
+    distance_miles: 8446
+    aircraft_type: "Widebody"
+  - origin: "LAX"
+    dest: "HND"
+    sector: "Transpacific"
+    distance_miles: 5488
+    aircraft_type: "Widebody"
+  - origin: "LHR"
+    dest: "CDG"
+    sector: "Intra-Europe"
+    distance_miles: 216
+    aircraft_type: "Narrowbody"
+  - origin: "LHR"
+    dest: "FRA"
+    sector: "Intra-Europe"
+    distance_miles: 407
+    aircraft_type: "Narrowbody"
+
+sectors:
+  - name: "US Domestic Transcon"
+    description: "East-West coast transcontinental routes (>2000 miles within US)"
+  - name: "US Domestic Short-Haul"
+    description: "High-density trunk routes (<1000 miles within US)"
+  - name: "Transatlantic"
+    description: "US-Europe international corridors"
+  - name: "Transpacific"
+    description: "US-Asia long-haul corridors"
+  - name: "Intra-Europe"
+    description: "European capital city-pairs"
+
+delay_cost:
+  # Airlines for America (A4A) 2023-2024 direct aircraft operating cost per minute benchmark:
+  # Baseline average narrowbody direct operating cost per minute = $85.50
+  direct_operating_cost_per_min: 85.50
+  direct_cost_components:
+    fuel_per_min: 35.20
+    crew_per_min: 26.80
+    maintenance_per_min: 15.10
+    aircraft_ownership_per_min: 8.40
+  
+  # FAA / US DOT Passenger Value of Time (PVOT) benchmark ($/hour converted to $/minute per pax)
+  # DOT guidance is ~$47/hr for all-purpose personal/business blend ~= $0.783/min
+  passenger_value_of_time_per_min: 0.783
+
+  # Multipliers and average seat capacities by aircraft size category
+  aircraft_categories:
+    Regional:
+      direct_cost_multiplier: 0.70
+      avg_seats: 76
+    Narrowbody:
+      direct_cost_multiplier: 1.00
+      avg_seats: 162
+    Widebody:
+      direct_cost_multiplier: 1.65
+      avg_seats: 285
+
+  # Delay thresholds
+  dot_buffer_minutes: 15 # Flights within 15 min considered DOT A14 on-time, but direct operating buffer can be set to 0 or 15
+  apply_cost_threshold_minutes: 0 # Calculate economic cost for all minutes delayed past scheduled time
+
+scrape_pricing:
+  headless: true
+  min_delay_sec: 1.5
+  max_delay_sec: 4.0
+  max_retries: 3
+  backoff_factor: 1.8
+  timeout_ms: 30000
+  default_cabin_class: "economy"
+  days_ahead: 14
+  search_window_days: 7
+  # Skyscanner scraping disclaimer:
+  # Automated scraping may breach Skyscanner's Terms of Service.
+  # For production use, register for the official Skyscanner Travel API (RapidAPI or Partners portal).
+
+opensky:
+  active_provider: "zenodo" # "zenodo" or "trino"
+  trino:
+    host: "trino.opensky-network.org"
+    port: 443
+    catalog: "minio"
+    schema: "osky"
+    username: "" # Academic research username
+    password: ""
+  zenodo:
+    data_dir: "data/delays/zenodo"
+    sample_file: "data/delays/zenodo_sample.csv"
